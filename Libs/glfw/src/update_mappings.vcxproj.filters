@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\Users\tonya\Desktop\Git\ComputoGrafico2025-4\Libs\glfw\CMakeFiles\ee86d1495df7f5a7d994d3ad21ac193d\update_mappings.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+    <CustomBuild Include="C:\Users\tonya\Desktop\Git\ComputoGrafico2025-4\Libs\glfw\src\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="C:\Users\tonya\Desktop\Git\ComputoGrafico2025-4\Libs\glfw\src\mappings.h.in">
+      <Filter>Header Files</Filter>
+    </None>
+    <None Include="C:\Users\tonya\Desktop\Git\ComputoGrafico2025-4\Libs\glfw\CMake\GenerateMappings.cmake" />
+    <None Include="C:\Users\tonya\Desktop\Git\ComputoGrafico2025-4\Libs\glfw\src\CMakeFiles\update_mappings" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{2D3EE064-F864-341B-B70C-19D53934F39A}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{D538B855-99BA-393C-A00E-046AB08E89E5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
