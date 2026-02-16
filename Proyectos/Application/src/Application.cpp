@@ -4,21 +4,14 @@
 
 void Application::setupGeometry()
 {
-	std::vector<float> geometry{
-		// X    Y    Z     W
-		-1.0f,  1.0, 0.0f, 1.0f,  //vertice 1
-		-1.0f, -1.0, 0.0f, 1.0f,  //vertice 2
-		 1.0f, -1.0, 0.0f, 1.0f,  //vertice 3
+	int n = 1;
 
-		1.0f, 0.0f, 0.0f, 1.0f,   //rojo
-		0.0f, 1.0f, 0.0f, 1.0f,   //verde
-		 0.0f, 0.0f, 1.0f, 1.0f   //azul
-	};
+	std::vector<glm::vec4> positions = plane.createPlane(n);
 
 	//Crear VAO
 	GLuint VAO, VBO;
 	glGenVertexArrays(1, &VAO);
-	ids["triangle"] = VAO;
+	ids["plane"] = VAO;
 
 	glBindVertexArray(VAO);
 
@@ -27,27 +20,20 @@ void Application::setupGeometry()
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);  //Ojo esto todavia no ha reservado memoria
 	//Pasar arreglo de vertices
+
 	glBufferData(GL_ARRAY_BUFFER,
-		sizeof(GLfloat) * geometry.size(),  //calculo de tamaño en bytes
-		&geometry[0],
+		sizeof(GLfloat) * positions.size()*4,  //calculo de tamaño en bytes IMPORTANTE: Se le pone 4 para que salga toda la malla
+		positions.data(),
 		GL_STATIC_DRAW);  //Mandamos la geometria al buffer
 
 	//vertices
-	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, 4, GL_FLOAT, GL_FALSE, 0, (void*)0);
 	glEnableVertexAttribArray(0);
 
 	//Colores
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, 0, (const void*)(12*sizeof(float)));
-	glEnableVertexAttribArray(1);
-}
 
-//void Application::setupProgram1()
-//{
-//	std::string vertexShader = loadTextFile("shaders/VertexShader.glsl");
-//	std::string fragmentShader = loadTextFile("shaders/FragmentShader.glsl");
-//	ids["program1"] = InitializeProgram(vertexShader, fragmentShader);
-//	ids["time1"] = glGetUniformLocation(ids["program1"], "time");
-//}
+	glVertexAttrib4f(1, 0.8f, 0.8f, 0.8f, 1.0f);
+}
 
 void Application::setupProgram2()
 {
@@ -70,7 +56,6 @@ void Application::keyCallback(int key, int scancode, int action, int mods)
 void Application::setup()
 {
 	setupGeometry();
-	//setupProgram1();
 	setupProgram2();
 	projection = glm::perspective(45.0f, 1024.0f / 768.0f, 0.1f, 100.0f);
 }
@@ -78,7 +63,7 @@ void Application::setup()
 void Application::update()
 {
 	time += 0.1f;
-	eye = glm::vec3( 0.0f, 0.0f, 2.0f + cos (time));
+	eye = glm::vec3( 0.0f, 0.0f, 2.5f);
 	camera = glm::lookAt(eye, center, glm::vec3(0.0f, 1.0f, 0.0f));
 }
 
@@ -92,9 +77,11 @@ void Application::draw()
 	glUniformMatrix4fv(ids["camera"],1 , GL_FALSE, &camera[0][0]);
 	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]);
 	
-	//Seleccionar la geometria (el triangulo)
-	glBindVertexArray(ids["triangle"]);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	//Seleccionar la geometria
+	glBindVertexArray(ids["plane"]);
 
 	//glDraw()
-	glDrawArrays(GL_TRIANGLES, 0, 3);
+	glDrawArrays(GL_TRIANGLES, 0, plane.vertexSize);
 }

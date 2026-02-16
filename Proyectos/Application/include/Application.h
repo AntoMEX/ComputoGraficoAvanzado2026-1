@@ -6,6 +6,7 @@
 #include "GLFW/glfw3.h"
 #include "glm/glm.hpp"
 #include "glm/gtc/matrix_transform.hpp"
+#include "Plane.h"
 
 class Application
 {
@@ -22,6 +23,8 @@ private:
 	glm::mat4 projection;
 	glm::vec3 eye{0.0f, 0.0f, 2.0f};
 	glm::vec3 center{0.1f, 0.1f, 0.5f};
+
+	Plane plane;
 
 public:
 
