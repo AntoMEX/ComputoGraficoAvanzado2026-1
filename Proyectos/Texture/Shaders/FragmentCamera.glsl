@@ -14,5 +14,5 @@ void main()
 {
 	//outColor = vertexColor;
 	//outColor = vec4(1.0,1.0,1.0,1.0);
-	outColor = texture(texture0, texCoord); //implementar mix
+	outColor = texture(texture0, texCoord); //implementar mix para la tarea de DoubleTexture
 }
