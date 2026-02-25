@@ -40,7 +40,6 @@ int main(void)
     //seccion de asignacion de callbacks
     glfwSetKeyCallback(app.window, MiCallback);
 
-
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     /* Loop until the user closes the window */

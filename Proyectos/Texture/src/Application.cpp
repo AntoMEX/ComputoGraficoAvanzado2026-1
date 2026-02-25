@@ -42,7 +42,6 @@ void Application::setupProgram2()
 	ids["camera"] = glGetUniformLocation(ids["program2"], "camera");
 	ids["projection"] = glGetUniformLocation(ids["program2"], "projection");
 	ids["texture0"] = glGetUniformLocation(ids["program2"], "texture0");
-	ids["texture1"] = glGetUniformLocation(ids["program2"], "texture1");
 }
 
 GLuint Application::setupTexture(const std::string& path)
@@ -95,7 +94,6 @@ void Application::setup()
 	setupGeometry();
 	setupProgram2();
 	ids["Dragon"] = setupTexture("Textures/Dragon.png");
-	ids["Dino"] = setupTexture("Textures/Dino.jpg");
 
 	//projection = glm::perspective(45.0f, 1024.0f / 768.0f, 0.1f, 100.0f);
 }
@@ -103,7 +101,7 @@ void Application::setup()
 void Application::update()
 {
 	time += 0.009f;
-	eye = glm::vec3(0.0f, 1.5f + cos(time), 1.5f + cos(time));
+	eye = glm::vec3(0.0f, 1.5f + cos(time) , 1.5f + cos(time));
 	center = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	model = glm::identity<glm::mat4>();
@@ -133,10 +131,7 @@ void Application::draw()
 
 	//Seleccionar texturas
 	glBindTexture(GL_TEXTURE_2D, ids["Dragon"]);
-	glBindTexture(GL_TEXTURE_2D, ids["Dino"]);
 	glUniform1i(ids["texture0"], 0);
-	glUniform1i(ids["texture1"], 1);
-
 	glActiveTexture(GL_TEXTURE0);
 
 	//glDraw()

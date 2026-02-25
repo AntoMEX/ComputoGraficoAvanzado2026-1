@@ -127,8 +127,8 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\..\Libs\glad\src\glad.c" />
-    <ClCompile Include="main.cpp" />
     <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\Plane.cpp" />
     <ClCompile Include="src\ShaderFuncs.cpp" />
   </ItemGroup>
