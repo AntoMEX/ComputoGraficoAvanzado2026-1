@@ -32,6 +32,7 @@ private:
 
 	void setupGeometry();
 	void setupProgram2();
+	GLuint setupTexture(const std::string& path);
 	float time{ 0.0f };
 	glm::mat4 camera;
 	glm::mat4 projection;
@@ -40,7 +41,7 @@ private:
 
 	glm::mat4 model;
 
-	Plane plane;
+	Plane oPlane;
 
 	Light light;
 	Material material;

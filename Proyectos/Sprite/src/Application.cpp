@@ -1,13 +1,13 @@
 #include "Application.h"
 #include <iostream>
 #include "ShaderFuncs.h"
-#include "glm/gtc/type_ptr.hpp"
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+#include "glm/gtc/type_ptr.hpp"
 
 void Application::setupGeometry()
 {
-	oPlane.createPlane(100);
+	oPlane.createPlane(1);
 
 	glGenVertexArrays(1, &oPlane.vao);
 	glBindVertexArray(oPlane.vao);
@@ -39,27 +39,14 @@ void Application::setupProgram2()
 	std::string fragmentShader = loadTextFile("shaders/FragmentCamera.glsl");
 	ids["program2"] = InitializeProgram(vertexShader, fragmentShader);
 	ids["time2"] = glGetUniformLocation(ids["program2"], "time");
+	ids["model"] = glGetUniformLocation(ids["program2"], "model");
 	ids["camera"] = glGetUniformLocation(ids["program2"], "camera");
 	ids["projection"] = glGetUniformLocation(ids["program2"], "projection");
+	ids["texture0"] = glGetUniformLocation(ids["program2"], "texture0");
 
-	ids["material.ambient"] = glGetUniformLocation(ids["program2"], "material.ambient");
-	ids["material.diffuse"] = glGetUniformLocation(ids["program2"], "material.diffuse");
-	ids["material.specular"] = glGetUniformLocation(ids["program2"], "material.specular");
-	ids["material.shininess"] = glGetUniformLocation(ids["program2"], "material.shininess");
-
-	ids["light.position"] = glGetUniformLocation(ids["program2"], "light.position");
-	ids["light.ambient"] = glGetUniformLocation(ids["program2"], "light.ambient");
-	ids["light.diffuse"] = glGetUniformLocation(ids["program2"], "light.diffuse");
-	ids["light.specular"] = glGetUniformLocation(ids["program2"], "light.specular");
-
-	ids["model"] = glGetUniformLocation(ids["program2"], "model");
-	ids["eye"] = glGetUniformLocation(ids["program2"], "eye");
-
-	ids["diffuseMap"] = glGetUniformLocation(ids["program2"], "diffuseMap"); //Diffuse Map
-	ids["normalMap"] = glGetUniformLocation(ids["program2"], "normalMap"); //Height Map
-
-	ids["heightScale"] = glGetUniformLocation(ids["program2"], "heightScale");
-
+	ids["sizeX"] = glGetUniformLocation(ids["program2"], "sizeX");
+	ids["sizeY"] = glGetUniformLocation(ids["program2"], "sizeY");
+	ids["index"] = glGetUniformLocation(ids["program2"], "index");
 }
 
 GLuint Application::setupTexture(const std::string& path)
@@ -99,42 +86,108 @@ void Application::keyCallback(int key, int scancode, int action, int mods)
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
 		glfwSetWindowShouldClose(window, true);
 
-	//teclas para mover	
+	//Teclas para mover el personaje en spritesheet
+	if (action == GLFW_PRESS)
+	{
+		//Seleccionar estado según tecla y arrancar desde frame 0
+		if (key == GLFW_KEY_D) //Movimiento
+		{
+			requestedState = STATE_MOVE;
+		}
+		else if (key == GLFW_KEY_SPACE) //Ataque
+		{
+			requestedState = STATE_ATTACK;
+		}
+		else if (key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT) //Defensa
+		{
+			requestedState = STATE_DEFEND;
+		}
+		else
+		{
+			return;
+		}
+
+		//Activar estado
+		currentState = requestedState;
+		keyHeld = true;
+		returnToIdle = false;
+		animTime = 0.0f; //Empezar desde el inicio
+		prevFrame = -1;
+	}
+	else if (action == GLFW_RELEASE)
+	{
+		//Si se suelta cualquiera de las teclas de acción, vuelve al idle
+		if (key == GLFW_KEY_D || key == GLFW_KEY_SPACE || key == GLFW_KEY_LEFT_SHIFT || key == GLFW_KEY_RIGHT_SHIFT)
+		{
+			keyHeld = false;
+			//si esta en un estado de acción, vuelve a idle al terminar el ciclo
+			if (currentState != STATE_IDLE)
+				returnToIdle = true;
+		}
+	}
 }
 
 void Application::setup()
 {
 	setupGeometry();
 	setupProgram2();
+	ids["Caballero"] = setupTexture("Textures/Caballero.png");
 
-	projection = glm::perspective(45.0f, 1024.0f / 768.0f, 0.1f, 100.0f);
-
-	light.position = glm::vec3(0.0f, 0.0f, 2.0f);
-	light.ambient = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-	light.diffuse = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-	light.specular = glm::vec4(0.5f, 0.5f, 0.5f, 1.0f);
-
-	/*material.ambient = glm::vec4(0.1f, 0.1f, 1.0f, 1.0f);
-	material.diffuse = glm::vec4(0.1f, 0.1f, 1.0f, 1.0f);
-	material.specular = glm::vec4(0.1f, 0.1f, 1.0f, 1.0f);
-	material.shininess = 1;*/
-
-	model = glm::mat4(1.0f);
-
-	ids["Diffuse"] = setupTexture("Textures/Diffuse Map.jpg");
-	ids["Normal"] = setupTexture("Textures/Normal Map.png");
-
+	//projection = glm::perspective(45.0f, 1024.0f / 768.0f, 0.1f, 100.0f);
 }
 
 void Application::update()
 {
-	time += 0.01f;
-	eye = glm::vec3(0.0f, 1.0f, 1.0f);
-	center = glm::vec3(0.0f, 0.0f, 0.0f);
-	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
+	time += 0.009f;
+
+	//Actualizar tiempo local
+	animTime += 0.009f;
+
+	//Calcular frame actual
+	int framesPerRow = (int)sizeX;
+	int frame = (int)(animTime * animFPS) % framesPerRow;
+
+	//Detectar final de ciclo
+	bool cycleCompleted = false;
+	if (prevFrame != -1)
+	{
+		if (prevFrame == framesPerRow - 1 && frame == 0)
+			cycleCompleted = true;
+	}
+	prevFrame = frame;
+
+	//Decidir fila osea estado actual
+	int row = 0;
+	if (currentState == STATE_IDLE) row = 0;
+	else if (currentState == STATE_MOVE) row = 1;
+	else if (currentState == STATE_ATTACK) row = 2;
+	else if (currentState == STATE_DEFEND) row = 3;
+
+	//Asignar index (columna = frame, fila = row)
+	index = glm::vec2((float)frame, (float)row);
+
+	//Si la tecla está siendo sostenida seguir en el mismo estado haciendo loop o si la tecla fue soltada termina el ciclo y vuelve a idle
+	if (!keyHeld && returnToIdle)
+	{
+		if (cycleCompleted)
+		{
+			//Terminar ciclo y volver a idle
+			currentState = STATE_IDLE;
+			requestedState = STATE_IDLE;
+			returnToIdle = false;
+			animTime = 0.0f;
+			prevFrame = -1;
+		}
+	}
+
+	eye = glm::vec3(0.0f, 2.5f, 0.0f);
+	center = glm::vec3(0.01f, 0.01f, 0.01f);
+	glm::vec3 up = glm::vec3(0.0f, 0.0f, -1.0f);
+	model = glm::identity<glm::mat4>();
 	camera = glm::lookAt(eye, center, up);
-	light.position = glm::vec3(cos(time), sin(time), 0.5f);
 	projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 0.1f, 200.0f);
+
+	//index = glm::vec2(1.0f, 1.0f);
 }
 
 void Application::draw()
@@ -144,27 +197,14 @@ void Application::draw()
 
 	//Pasar el resto de los parámetros para el programa
 	glUniform1f(ids["time2"], time);
-	glUniformMatrix4fv(ids["camera"], 1, GL_FALSE, &camera[0][0]);
+	glUniformMatrix4fv(ids["model"], 1, GL_FALSE, &model[0][0]);
+	glUniformMatrix4fv(ids["camera"],1 , GL_FALSE, &camera[0][0]);
 	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]);
 
-	glUniform3fv(ids["light.position"], 1, glm::value_ptr(light.position));
-	glUniform4fv(ids["light.ambient"], 1, glm::value_ptr(light.ambient));
-	glUniform4fv(ids["light.diffuse"], 1, glm::value_ptr(light.diffuse));
-	glUniform4fv(ids["light.specular"], 1, glm::value_ptr(light.specular));
-
-	glUniform1i(ids["material.shininess"], material.shininess);
-	glUniform4fv(ids["material.ambient"], 1, glm::value_ptr(material.ambient));
-	glUniform4fv(ids["material.diffuse"], 1, glm::value_ptr(material.diffuse));
-	glUniform4fv(ids["material.specular"], 1, glm::value_ptr(material.specular));
-
-	glUniformMatrix4fv(ids["model"], 1, GL_FALSE, glm::value_ptr(model));
-
-	glUniform3fv(ids["eye"], 1, glm::value_ptr(eye));
-
-	glUniformMatrix4fv(ids["camera"], 1, GL_FALSE, &camera[0][0]);
-	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]);
-
-
+	glUniform1f(ids["sizeX"], sizeX);
+	glUniform1f(ids["sizeY"], sizeY);
+	glUniform2f(ids["index"], index.x, index.y);
+	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	glPolygonMode(GL_FRONT, GL_FILL);
@@ -174,15 +214,12 @@ void Application::draw()
 	glBindVertexArray(oPlane.vao);
 
 	//Seleccionar texturas
+	glBindTexture(GL_TEXTURE_2D, ids["Caballero"]);
+	glUniform1i(ids["texture0"], 0);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, ids["Diffuse"]);
-	glUniform1i(ids["diffuseMap"], 0);
-	
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_2D, ids["Normal"]);
-	glUniform1i(ids["normalMap"], 1);
-	
 
 	//glDraw()
 	glDrawArrays(GL_TRIANGLES, 0, oPlane.getNumVertex());
 }
+//página de spritesheets: https://artpictures.club/autumn-2023.html
+//spritesheet de caballero recuperada de https://ar.inspiredpencil.com/pictures-2023/sprite-sheet-png

@@ -81,11 +81,6 @@ GLuint Application::setupTexture(const std::string& path)
 	return textID;
 }
 
-//void Application::setTexture(GLuint texture)
-//{
-//
-//}
-
 void Application::keyCallback(int key, int scancode, int action, int mods)
 {
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
@@ -107,14 +102,18 @@ void Application::setup()
 
 void Application::update()
 {
-	time += 0.009f;
-	eye = glm::vec3(0.0f, 1.5f /* + cos(time)*/, 1.5f /* + cos(time)*/);
+	time += 0.01f;
+
+	/*float baseDist = 2.0f;
+	float dist = baseDist - zoom;
+	if (dist < 0.5f) dist = 0.5f; //Limite*/
+
+	eye = glm::vec3(0.0f, 1.5f /* + cos(time)*/, 1.5 /* + cos(time)*/);
 	center = glm::vec3(0.0f, 0.0f, 0.0f);
 	glm::vec3 up = glm::vec3(0.0f, 1.0f, 0.0f);
 	model = glm::identity<glm::mat4>();
 	camera = glm::lookAt(eye, center, up);
 	projection = glm::perspective(glm::radians(45.0f), (1024.0f / 768.0f), 0.1f, 200.0f);
-
 }
 
 void Application::draw()
@@ -136,10 +135,7 @@ void Application::draw()
 	glUniformMatrix4fv(ids["projection"], 1, GL_FALSE, &projection[0][0]);
 
 	glUniform1f(ids["mixFactor"], mixFactor);
-
 	
-
-	float heightScale = 0.5f; //0.0 = plano plano, 1.0 = altura máxima igual a 1.0 unidades
 	glUniform1f(ids["heightScale"], heightScale);
 	
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);

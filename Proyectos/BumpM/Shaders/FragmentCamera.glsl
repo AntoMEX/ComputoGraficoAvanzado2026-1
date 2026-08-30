@@ -4,7 +4,12 @@ out vec4 outColor;
 uniform float time;
 
 in vec3 fragPos;
-in vec3 fragNormal;
+
+uniform sampler2D diffuseMap;
+uniform sampler2D normalMap;
+
+in vec2 texCoord;
+in mat4 normalMatrix;
 
 struct Light
 {
@@ -23,7 +28,7 @@ struct Material
 };
 
 uniform Light light;
-uniform Material material;
+Material material;
 uniform vec3 eye;
 
 //ADS de fragmentshader
@@ -44,6 +49,16 @@ vec4 Specular (struct Light light, struct Material material, vec3 R, vec3 V)
 
 void main()
 {
+    material.diffuse = texture(diffuseMap, texCoord);
+    material.ambient = material.diffuse;
+    material.specular = material.diffuse;
+    material.shininess = 2;
+
+    vec3 normal = texture(normalMap, texCoord).xyz;
+
+    //Normal transformada
+    vec3 fragNormal = normalize(normalMatrix * vec4 (normal,0)).xyz;
+
     vec3 L = normalize(light.position - fragPos);
 
     vec3 V = normalize(eye - fragPos);
@@ -52,7 +67,7 @@ void main()
 
     //ADS
     vec4 A = Ambient(light, material);
-    vec4 D = Diffuse(light, material, normalize(fragNormal), L);
+    vec4 D = Diffuse(light, material, fragNormal, L);
     vec4 S = Specular(light, material, R, V);
 
     outColor = A + D + S;

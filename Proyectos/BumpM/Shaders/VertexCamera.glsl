@@ -1,13 +1,18 @@
 #version 460 core
 
 layout (location = 0) in vec4 vPosition;
-//layout (location = 1) in vec4 vColor;
+layout (location = 1) in vec2 vTexCoord;
 
 //out vec4 vertexColor;
 uniform float time;
 uniform mat4 camera;
 uniform mat4 projection;
 uniform mat4 model;  
+
+uniform sampler2D normalMap;
+uniform float heightScale;
+
+out vec2 texCoord;
 
 struct Light
 {
@@ -34,10 +39,12 @@ uniform vec3 eye;
 
 //Datos para pasar al fragment shader
 out vec3 fragPos;   //Posición del vértice en espacio mundo
-out vec3 fragNormal; //Normal transformada
+
+out mat4 normalMatrix;
 
 void main ()
 {          
+    texCoord = vTexCoord;
     //modelview
     mat4 modelview = camera * model;  
 
@@ -48,10 +55,7 @@ void main ()
     fragPos = vec3(model * vPosition);
 
     //Matriz de normales
-    mat3 normalMatrix = transpose(inverse(mat3(model)));
-
-    //Normal transformada
-    fragNormal = normalize(normalMatrix * normal);
+    normalMatrix = transpose(inverse(modelview));
 
     gl_Position = projection * newPosition;
 }

@@ -21,8 +21,8 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>17.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{3d688a32-026f-443c-8053-b437518d074d}</ProjectGuid>
-    <RootNamespace>BumpM</RootNamespace>
+    <ProjectGuid>{1520a1dc-d24f-41cb-b077-9054219b6637}</ProjectGuid>
+    <RootNamespace>Sprite</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />

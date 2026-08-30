@@ -98,7 +98,7 @@ void Plane::createPlane(int side)
 			colNorm += 18;
 		}
 
-
+	
 	//En 1x1 debe quedar asi
 	textureCoords[0] = 0.0f;
 	textureCoords[1] = 0.0f;
@@ -118,7 +118,7 @@ void Plane::createPlane(int side)
 
 	textureCoords[10] = 1.0f;
 	textureCoords[11] = 0.0f;
-
+	
 
 }
 

@@ -13,14 +13,6 @@ uniform sampler2D heightMap;
 uniform float mixFactor;
 
 void main()
-{
-	//outColor = vertexColor;
-	//outColor = vec4(1.0,1.0,1.0,1.0);
-
-	//vec4 textureA = texture(texture0, texCoord);
-	//vec4 textureB = texture(texture1, texCoord);
-
-	//outColor = mix(textureA, textureB, mixFactor); 
-	
+{	
 	outColor = texture(heightMap, texCoord);
 }

@@ -9,29 +9,6 @@ void MiCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
     app.keyCallback(key, scancode, action, mods);
 }
 
-void MouseCallback(GLFWwindow* window, double xpos, double ypos)
-{
-    //Normalizar a [-1,1] en X y Y respecto al tamaño de la ventana
-    int width, height;
-    glfwGetWindowSize(window, &width, &height);
-    float nx = (float)(xpos / width) * 2.0f - 1.0f; //-1 a 1
-    float ny = (float)(ypos / height) * 2.0f - 1.0f; //-1 a 1
-
-    //Mapeado de ángulos razonables
-    app.rotY = nx * 1.5708f; // +/- pi/2
-    app.rotX = -ny * 1.5708f; //invertir Y para control natural
-}
-
-void ScrollCallback(GLFWwindow* window, double xoffset, double yoffset) 
-{
-    //> 0 = scroll arriba aumenta altura y < 0 = scroll abajo disminuye altura
-    app.heightScale += (float)yoffset * 0.1f;
-
-    //Limites
-    if (app.heightScale < 0.0f) app.heightScale = 0.0f;
-    if (app.heightScale > 1.0f) app.heightScale = 1.0f;
-}
-
 int main(void)
 {
 
@@ -61,11 +38,7 @@ int main(void)
     app.setup();
 
     //seccion de asignacion de callbacks
-    glfwSetKeyCallback(app.window, MiCallback); //Teclas
-
-    glfwSetCursorPosCallback(app.window, MouseCallback); //Mouse
-
-    glfwSetScrollCallback(app.window, ScrollCallback); //Scroll
+    glfwSetKeyCallback(app.window, MiCallback);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
